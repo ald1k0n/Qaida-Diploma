@@ -1,0 +1,56 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum SEX {
+  MALE
+  FEMALE
+  BINARY
+}
+
+model User {
+  id            Int       @id @unique @default(autoincrement())
+  name          String
+  surname       String
+  father_name   String?
+  password      String
+  email         String
+  messenger_one String?
+  messenger_two String?
+  gender        SEX       @default(BINARY)
+  avatar        Image?    @relation(fields: [image_id], references: [id])
+  lobby         Lobby?    @relation(fields: [lobby_id], references: [id])
+  lobby_id      String?
+  friends_to    Friends[] @relation("user_1")
+  friends_me    Friends[] @relation("user_2")
+  image_id       Int?
+}
+
+model Image {
+  id       Int    @id @unique @default(autoincrement())
+  mimetype String
+  buffer   Bytes
+  size     Int
+  User     User[]
+}
+
+model Lobby {
+  id   String @id @unique @default(uuid())
+  User User[]
+}
+
+model Friends {
+  id       Int  @id @default(autoincrement())
+  user1    User @relation(fields: [user_id], references: [id], name: "user_1")
+  user_id  Int
+  user2    User @relation(fields: [user2_id], references: [id], name: "user_2")
+  user2_id Int
+}
