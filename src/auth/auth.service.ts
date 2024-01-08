@@ -9,6 +9,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import * as bcrypt from 'bcryptjs';
 import { AuthDTO } from './auth.dto';
 import { JwtService } from '@nestjs/jwt';
+import { UserDTO } from 'src/user/user.dto';
 
 @Injectable()
 export class AuthService {
@@ -29,11 +30,17 @@ export class AuthService {
     );
   }
 
+  private async getUser(payload: UserDTO) {
+    return await this.prisma.user.findFirst({ where: payload });
+  }
+
   public async createUser(payload: AuthDTO) {
     try {
-      const candidate = await this.prisma.user.findFirst({
-        where: { email: payload.email },
-      });
+      // const candidate = await this.prisma.user.findFirst({
+      //   where: { email: payload.email },
+      // });
+
+      const candidate = await this.getUser({ email: payload.email });
 
       if (candidate) throw new ConflictException('User already exists');
 
@@ -57,11 +64,13 @@ export class AuthService {
   }
 
   public async authorize(payload: AuthDTO) {
-    const candidate = await this.prisma.user.findFirst({
-      where: {
-        email: payload.email,
-      },
-    });
+    // const candidate = await this.prisma.user.findFirst({
+    //   where: {
+    //     email: payload.email,
+    //   },
+    // });
+
+    const candidate = await this.getUser({ email: payload.email });
 
     if (!candidate) throw new UnauthorizedException('User does not exists');
 
@@ -84,7 +93,9 @@ export class AuthService {
 
   public async getme(id: number) {
     try {
-      return await this.prisma.user.findFirst({ where: { id } });
+      const candidate = await this.getUser({ id });
+
+      return candidate;
     } catch (error) {
       this.logger.error('ERROR', JSON.stringify(error, null, 2));
       throw new UnauthorizedException(error);
@@ -97,7 +108,7 @@ export class AuthService {
         secret: process.env?.REFRESH_TOKEN,
       });
 
-      const user = await this.prisma.user.findFirst({ where: { id } });
+      const user = await this.getUser({ id });
 
       if (!user) throw new Error('User not found');
 
