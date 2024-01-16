@@ -23,7 +23,7 @@ export class UserService {
   /**
    *  Обновляет пользователя для того чтобы не писать один и тот же код несколько раз
    */
-  private async updateUserInDB(data: UserDTO, id: ObjectId) {
+  private async updateUserInDB(data: any, id: ObjectId) {
     return await this.user.updateOne({ _id: id }, data);
   }
 
@@ -68,44 +68,42 @@ export class UserService {
   }
 
   public async addFriend(id: ObjectId, friend_id: ObjectId) {
-    const currentUser = await this.user.updateOne(
-      { _id: id },
+    const currentUser = await this.updateUserInDB(
       {
         $push: {
           friends: friend_id,
         },
       },
+      id,
     );
-
-    const friend = await this.user.updateOne(
-      { _id: friend_id },
+    const friend = await this.updateUserInDB(
       {
         $push: {
           friends: id,
         },
       },
+      friend_id,
     );
 
     return { currentUser, friend };
   }
 
   public async removeFriend(id: ObjectId, friend_id: ObjectId) {
-    const currentUser = await this.user.updateOne(
-      { _id: id },
+    const currentUser = await this.updateUserInDB(
       {
-        $pop: {
+        $pull: {
           friends: friend_id,
         },
       },
+      id,
     );
-
-    const friend = await this.user.updateOne(
-      { _id: friend_id },
+    const friend = await this.updateUserInDB(
       {
-        $pop: {
+        $pull: {
           friends: id,
         },
       },
+      friend_id,
     );
 
     return { currentUser, friend };

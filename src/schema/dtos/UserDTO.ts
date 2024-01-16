@@ -51,6 +51,11 @@ export class UserDTO {
     ref: 'File',
   })
   image_id?: ObjectId;
+
+  @Prop({
+    type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Interest' }],
+  })
+  interests?: ObjectId[];
 }
 
 export const UserSchema = SchemaFactory.createForClass(UserDTO);
