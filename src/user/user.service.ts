@@ -1,70 +1,53 @@
+import { UserDTO } from 'src/schema/dtos/UserDTO';
 import {
   Injectable,
+  Logger,
   MethodNotAllowedException,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
-import { PrismaService } from 'src/prisma/prisma.service';
-import { UploadDTO, UserDTO } from './user.dto';
 
 import * as bcrypt from 'bcryptjs';
+import { InjectModel } from '@nestjs/mongoose';
+import mongoose, { Model, ObjectId } from 'mongoose';
+import { FileDTO } from 'src/schema/dtos/FileDTO';
 
 @Injectable()
 export class UserService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    @InjectModel('User') private readonly user: Model<UserDTO>,
+    @InjectModel('File') private readonly file: Model<FileDTO>,
+  ) {}
+
+  private logger = new Logger();
   /**
    *  Обновляет пользователя для того чтобы не писать один и тот же код несколько раз
    */
-  private async updateUserInDB(data: UserDTO, id: number) {
-    return await this.prisma.user.update({
-      where: { id },
-      data,
-    });
+  private async updateUserInDB(data: UserDTO, id: ObjectId) {
+    return await this.user.updateOne({ _id: id }, data);
   }
 
-  async uploadAvatar(file: UploadDTO, id: number) {
-    return await this.prisma.$transaction(async (tx) => {
-      const { id: file_id } = await tx.image.create({ data: file });
+  public async uploadAvatar(file: FileDTO, _id: ObjectId) {
+    const image = (await this.file
+      .create(file)
+      .catch((err) => this.logger.error(err))) as FileDTO;
 
-      const user = await tx.user.update({
-        where: { id },
-        data: {
-          image_id: file_id,
-        },
-      });
+    const user = await this.updateUserInDB({ image_id: image._id }, _id);
 
-      const data = {
-        ...user,
-        avatar: `${process.env?.BACKEND_URL}/api/image/${file_id}`,
-      };
+    const data = {
+      ...user,
+      image: `${process.env?.BACKEND_URL}/api/image/${image._id}`,
+    };
 
-      return data;
-    });
+    return data;
   }
 
-  async updateUser({
-    id,
-    email,
-    father_name,
-    messenger_one,
-    messenger_two,
-    name,
-    surname,
-  }: UserDTO) {
-    return await this.updateUserInDB(
-      {
-        email,
-        father_name,
-        messenger_one,
-        messenger_two,
-        name,
-        surname,
-      },
-      id,
-    );
+  public async updateUser(body: UserDTO) {
+    return await this.updateUserInDB(body, body._id);
   }
 
-  async updatePassword(prevPass: string, newPass: string, id: number) {
-    const user = await this.prisma.user.findFirst({ where: { id } });
+  public async updatePassword(prevPass: string, newPass: string, id: ObjectId) {
+    const user = await this.user.findOne({ _id: id });
     if (!user) throw new NotFoundException('User not found!');
     if (!bcrypt.compareSync(prevPass, user.password))
       throw new MethodNotAllowedException('Password did not match');
@@ -75,45 +58,56 @@ export class UserService {
     );
   }
 
-  async addFriend(id: number, friend_id: number) {
-    const friend = await this.prisma.$transaction(async (tx) => {
-      const currentFriend = await tx.friends.create({
-        data: {
-          user_id: id,
-          user2_id: friend_id,
-        },
-      });
-
-      const otherFriend = await tx.friends.create({
-        data: {
-          user_id: friend_id,
-          user2_id: id,
-        },
-      });
-      return { currentFriend, otherFriend };
-    });
-    return friend;
+  public async getme(_id: mongoose.Schema.Types.ObjectId) {
+    try {
+      const candidate = await this.user.findById(_id);
+      return candidate;
+    } catch (error) {
+      throw new UnauthorizedException(error);
+    }
   }
 
-  async removeFriend(id: number, friend_id: number) {
-    const removedFriends = await this.prisma.$transaction(async (tx) => {
-      const currentFriend = await tx.friends.deleteMany({
-        where: {
-          user_id: id,
-          user2_id: friend_id,
+  public async addFriend(id: ObjectId, friend_id: ObjectId) {
+    const currentUser = await this.user.updateOne(
+      { _id: id },
+      {
+        $push: {
+          friends: friend_id,
         },
-      });
+      },
+    );
 
-      const otherFriend = await tx.friends.deleteMany({
-        where: {
-          user_id: friend_id,
-          user2_id: id,
+    const friend = await this.user.updateOne(
+      { _id: friend_id },
+      {
+        $push: {
+          friends: id,
         },
-      });
+      },
+    );
 
-      return { currentFriend, otherFriend };
-    });
+    return { currentUser, friend };
+  }
 
-    return removedFriends;
+  public async removeFriend(id: ObjectId, friend_id: ObjectId) {
+    const currentUser = await this.user.updateOne(
+      { _id: id },
+      {
+        $pop: {
+          friends: friend_id,
+        },
+      },
+    );
+
+    const friend = await this.user.updateOne(
+      { _id: friend_id },
+      {
+        $pop: {
+          friends: id,
+        },
+      },
+    );
+
+    return { currentUser, friend };
   }
 }

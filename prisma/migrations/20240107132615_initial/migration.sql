@@ -1,6 +1,0 @@
--- AlterTable
-ALTER TABLE "User" ALTER COLUMN "father_name" DROP NOT NULL,
-ALTER COLUMN "email" DROP NOT NULL,
-ALTER COLUMN "messenger_one" DROP NOT NULL,
-ALTER COLUMN "messenger_two" DROP NOT NULL,
-ALTER COLUMN "avatar" DROP NOT NULL;

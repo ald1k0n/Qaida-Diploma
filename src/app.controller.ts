@@ -1,20 +1,20 @@
 import { Controller, Get, Param, Res } from '@nestjs/common';
-import { PrismaService } from './prisma/prisma.service';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model, ObjectId } from 'mongoose';
+import { FileDTO } from './schema/dtos/FileDTO';
 import { Response } from 'express';
-
 @Controller()
 export class AppController {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(@InjectModel('File') private readonly file: Model<FileDTO>) {}
 
   @Get('/image/:id')
-  async getImage(@Param('id') id: number, @Res() res: Response) {
-    const file = await this.prisma.image.findFirst({
-      where: { id: Number(id) },
-    });
+  async getImage(@Param('id') id: ObjectId, @Res() res: Response) {
+    const image = await this.file.findById(id);
+
     res.set({
-      'Content-Type': file.mimetype,
-      'Content-Length': file.size,
+      'Content-Type': image.mimetype,
+      'Content-Length': image.size,
     });
-    res.send(file.buffer);
+    res.send(image.buffer);
   }
 }
