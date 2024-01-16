@@ -14,7 +14,7 @@ import {
 import { UserService } from './user.service';
 import { FileInterceptor } from '@nestjs/platform-express';
 // import { UploadDTO, UserDTO } from './user.dto';
-import { AuthGuard } from 'src/auth/auth.guard';
+import { AuthGuard } from 'src/shared/guards/auth.guard';
 import { Request } from 'express';
 import { ObjectId } from 'mongoose';
 import { UserDTO } from 'src/schema/dtos/UserDTO';

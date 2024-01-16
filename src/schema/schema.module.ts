@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { UserSchema } from './dtos/UserDTO';
-import { FileSchema } from './dtos/FileDTO';
+import { UserSchema, FileSchema, InterestSchema, AdminSchema } from './dtos';
 
 @Module({
   imports: [
@@ -13,6 +12,14 @@ import { FileSchema } from './dtos/FileDTO';
       {
         name: 'File',
         schema: FileSchema,
+      },
+      {
+        name: 'Interest',
+        schema: InterestSchema,
+      },
+      {
+        name: 'Admin',
+        schema: AdminSchema,
       },
     ]),
   ],

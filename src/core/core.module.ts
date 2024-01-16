@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { MongoModule } from 'src/mongo/mongo.module';
+import { AdminModule } from '../admin/admin.module';
 
 @Module({
   imports: [
@@ -11,9 +12,9 @@ import { MongoModule } from 'src/mongo/mongo.module';
     }),
     ConfigModule.forRoot({
       envFilePath: 'src/core/.env',
-      isGlobal: true,
       ignoreEnvVars: false,
     }),
+    AdminModule,
   ],
   exports: [MongoModule, JwtModule, ConfigModule],
 })
