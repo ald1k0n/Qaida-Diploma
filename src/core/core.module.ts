@@ -1,14 +1,20 @@
 import { Module } from '@nestjs/common';
-import { PrismaModule } from 'src/prisma/prisma.module';
+import { ConfigModule } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
+import { MongoModule } from 'src/mongo/mongo.module';
 
 @Module({
   imports: [
-    PrismaModule,
+    MongoModule,
     JwtModule.register({
       global: true,
     }),
+    ConfigModule.forRoot({
+      envFilePath: 'src/core/.env',
+      isGlobal: true,
+      ignoreEnvVars: false,
+    }),
   ],
-  exports: [PrismaModule, JwtModule],
+  exports: [MongoModule, JwtModule, ConfigModule],
 })
 export class CoreModule {}
