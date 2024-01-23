@@ -1,9 +1,12 @@
 import { Module } from '@nestjs/common';
-import { LobbyGateway } from './lobby.gateway';
 import { LobbyService } from './lobby.service';
+import { LobbyController } from './lobby.controller';
+
+import { SchemaModule } from 'src/schema/schema.module';
 
 @Module({
-  providers: [LobbyService, LobbyGateway],
-  exports: [LobbyGateway],
+  imports: [SchemaModule],
+  providers: [LobbyService],
+  controllers: [LobbyController],
 })
 export class LobbyModule {}
