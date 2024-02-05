@@ -16,7 +16,9 @@ import { LobbyDTO } from 'src/schema/dtos';
 import { Request } from 'express';
 import { AuthGuard } from 'src/shared/guards/auth.guard';
 import { ObjectId } from 'mongoose';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Lobby')
 @Controller('lobby')
 export class LobbyController {
   constructor(private readonly lobbyService: LobbyService) {}

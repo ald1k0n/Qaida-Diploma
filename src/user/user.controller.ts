@@ -19,7 +19,9 @@ import { Request } from 'express';
 import { ObjectId } from 'mongoose';
 import { UserDTO } from 'src/schema/dtos/UserDTO';
 import { FileDTO } from 'src/schema/dtos/FileDTO';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('User')
 @UseGuards(AuthGuard)
 @Controller('user')
 export class UserController {
