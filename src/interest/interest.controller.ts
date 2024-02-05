@@ -10,7 +10,8 @@ import { AdminGuard } from 'src/shared/guards/admin.guard';
 
 import { InterestService } from './interest.service';
 import { ObjectId } from 'mongoose';
-
+import { ApiTags } from '@nestjs/swagger';
+@ApiTags('Interest')
 @UseGuards(AdminGuard)
 @Controller('admin/interest')
 export class InterestContoller {
