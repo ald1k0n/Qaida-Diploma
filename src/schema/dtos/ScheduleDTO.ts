@@ -7,11 +7,22 @@ export type ScheduleDocument = HydratedDocument<ScheduleDTO>;
 export class ScheduleDTO {
   _id: mongoose.Schema.Types.ObjectId;
 
-  @Prop()
-  from: string;
-
-  @Prop()
-  to: string;
+  @Prop({
+    type: [
+      {
+        from: {
+          type: String,
+        },
+        to: { type: String },
+        day: { type: String },
+      },
+    ],
+  })
+  schedule: {
+    from: string;
+    to: string;
+    day: string;
+  }[];
 }
 
 export const ScheduleSchema = SchemaFactory.createForClass(ScheduleDTO);

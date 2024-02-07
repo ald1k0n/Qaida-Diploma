@@ -5,7 +5,7 @@ export type PlaceDocument = HydratedDocument<PlacesDTO>;
 
 @Schema()
 export class PlacesDTO {
-  _id: mongoose.Schema.Types.ObjectId;
+  _id?: mongoose.Schema.Types.ObjectId;
 
   @Prop()
   title: string;
@@ -14,13 +14,12 @@ export class PlacesDTO {
   subtitle: string;
 
   @Prop()
-  description: string;
+  description?: string;
 
   @Prop({
-    ref: 'Category',
-    type: mongoose.Schema.Types.ObjectId,
+    type: [{ ref: 'Category', type: mongoose.Schema.Types.ObjectId }],
   })
-  category_id: mongoose.Schema.Types.ObjectId;
+  category_id: mongoose.Schema.Types.ObjectId[];
 
   @Prop()
   address: string;
@@ -35,13 +34,10 @@ export class PlacesDTO {
   url: string;
 
   @Prop()
-  image: string;
+  image?: string;
 
   @Prop()
-  phone_number: string;
-
-  @Prop()
-  score: number;
+  score?: number[];
 
   @Prop({
     min: 1,
@@ -51,17 +47,16 @@ export class PlacesDTO {
   score_2gis: number;
 
   @Prop({
-    type: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Schedule',
-      },
-    ],
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Schedule',
   })
-  schedule_id: mongoose.Schema.Types.ObjectId;
+  schedule_id?: mongoose.Schema.Types.ObjectId;
 
   @Prop()
-  neighborhood: string;
+  neighborhood_name?: string;
+
+  @Prop()
+  neighborhood_id: string;
 
   @Prop()
   building_id: number;

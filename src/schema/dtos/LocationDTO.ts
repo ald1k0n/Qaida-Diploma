@@ -14,7 +14,7 @@ export class LocationDTO {
   @Prop({
     required: true,
   })
-  lng: number;
+  lon: number;
 }
 
 export const LocationSchema = SchemaFactory.createForClass(LocationDTO);
