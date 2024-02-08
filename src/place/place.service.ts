@@ -1,6 +1,11 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  MethodNotAllowedException,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, ObjectId } from 'mongoose';
 import {
   CategoryDocument,
   LocationDocument,
@@ -8,7 +13,11 @@ import {
   PlacesDTO,
   ScheduleDocument,
 } from 'src/schema/dtos';
-
+import { LocationService } from 'src/shared/services/location.service';
+import {
+  getIdFromName,
+  getResponseById,
+} from 'src/shared/utils/integrationService';
 @Injectable()
 export class PlaceService {
   constructor(
@@ -16,29 +25,35 @@ export class PlaceService {
     @InjectModel('Location') private readonly location: Model<LocationDocument>,
     @InjectModel('Category') private readonly category: Model<CategoryDocument>,
     @InjectModel('Schedule') private readonly schedule: Model<ScheduleDocument>,
+    private readonly locationService: LocationService,
   ) {}
 
   private logger = new Logger();
 
+  private async isPlaceExist(name: string) {
+    const place = await this.place.findOne({
+      title: {
+        $regex: name,
+        $options: 'i',
+      },
+    });
+    this.logger.debug('Существует? ', place ? 'Да' : 'Нет');
+    return place;
+  }
+
   async addPlace(name: string) {
-    const url = `https://catalog.api.2gis.com/3.0/items?q=Астана ${name}&key=${process.env?.API_KEY}&has_photos=true&fields=items.point`;
-    const resp = await fetch(url).then((res) => res.json());
-    const items = resp.result.items as any[];
-    const { id } = items.find(
-      (el) => el.name?.toLowerCase().includes(name.toLowerCase()),
-    );
-
+    const isExists = await this.isPlaceExist(name);
+    if (isExists) {
+      throw new MethodNotAllowedException('Место уже существует');
+    }
+    const id = await getIdFromName(name, process.env?.API_KEY);
     if (!id)
-      throw new NotFoundException('Место не найдено, введите совпадение');
+      throw new NotFoundException(
+        'Место не найдено, введите точное совпадение',
+      );
 
-    // const location = bestMatch?.map((el) => el.point);
+    const response = await getResponseById(id, process.env?.API_KEY);
 
-    const url1 = `https://catalog.api.2gis.com/3.0/items/byid?id=${id}&key=${process.env?.API_KEY}&fields=items.point,items.links,items.external_content,items.rubrics,items.reviews,items.schedule`;
-    const response = await fetch(url1)
-      .then((res) => res.json())
-      .then((res) => res.result.items[0]);
-
-    const location = response.point;
     const categories = response.rubrics.map((r) => ({
       name: r.name,
     }));
@@ -47,42 +62,21 @@ export class PlaceService {
     ).main_photo_url;
 
     const neighborhood = response.links.nearest_stations[0];
-    // this.logger.log('Соседи', neighborhood);
     const score_2gis = response.reviews.general_rating;
 
-    let scheduleArray = [];
-    if (response.schedule) {
-      scheduleArray = Object.entries(response.schedule)
-        .map(([day, data]: [day: any, data: any]) => {
-          const workingHours =
-            data.working_hours && data.working_hours.length > 0
-              ? data.working_hours[0]
-              : { from: '', to: '' };
-          return {
-            from: workingHours.from,
-            to: workingHours.to,
-            day: day,
-          };
-        })
-        .sort((a, b) => {
-          const daysOrder = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-          return daysOrder.indexOf(a.day) - daysOrder.indexOf(b.day);
-        });
-    }
-
-    this.logger.log('Расписание', scheduleArray);
+    const scheduleArray = this.formSchedule(response.schedule);
 
     const schedules =
       scheduleArray.length > 0
         ? await this.schedule.create({ schedule: scheduleArray })
         : null;
-    // // // this.logger.log('schedules', schedules);
-    const locationData = await this.location.create(location);
-    const categoriesData = (await this.category.insertMany(categories)).map(
-      (c) => c._id,
-    );
-    // // this.logger.log('coords', locationData._id);
 
+    // const locationData = await this.location.create(location);
+
+    const locationData = await this.locationService.addLocation(response.point);
+
+    const categoriesData = await this.createOrGetExistCategory(categories);
+    this.logger.debug('Категории ид', categoriesData);
     const data: PlacesDTO = {
       address: response.address_name as string,
       title: response.name as string,
@@ -101,5 +95,49 @@ export class PlaceService {
     const insertedPlace = await this.place.create(data);
 
     return insertedPlace;
+  }
+
+  private formSchedule(schedule: any) {
+    let scheduleArray = [];
+    if (schedule) {
+      scheduleArray = Object.entries(schedule)
+        .map(([day, data]: [day: any, data: any]) => {
+          const workingHours =
+            data.working_hours && data.working_hours.length > 0
+              ? data.working_hours[0]
+              : { from: '', to: '' };
+          return {
+            from: workingHours.from,
+            to: workingHours.to,
+            day: day,
+          };
+        })
+        .sort((a, b) => {
+          const daysOrder = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+          return daysOrder.indexOf(a.day) - daysOrder.indexOf(b.day);
+        });
+      return scheduleArray;
+    }
+    return scheduleArray;
+  }
+
+  private async createOrGetExistCategory(categories: { name: string }[]) {
+    const categoryIds: ObjectId[] = [];
+    for (const category of categories) {
+      const existingCategory = await this.category.findOne({
+        name: category.name,
+      });
+      if (existingCategory) {
+        this.logger.log('Существует категория', existingCategory._id);
+        categoryIds.push(existingCategory._id);
+      } else {
+        const newCategory = await this.category.create({
+          name: category.name,
+        });
+        this.logger.log('Новая категория', newCategory._id);
+        categoryIds.push(newCategory._id);
+      }
+    }
+    return categoryIds;
   }
 }
