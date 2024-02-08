@@ -1,4 +1,4 @@
-import { UserDTO } from 'src/schema/dtos/UserDTO';
+import { UserDTO } from 'src/schema/dtos/UserDTO.dto';
 import {
   Injectable,
   Logger,
@@ -10,7 +10,7 @@ import {
 import * as bcrypt from 'bcryptjs';
 import { InjectModel } from '@nestjs/mongoose';
 import mongoose, { Model, ObjectId } from 'mongoose';
-import { FileDTO } from 'src/schema/dtos/FileDTO';
+import { FileDTO } from 'src/schema/dtos/FileDTO.dto';
 import { CategoryDTO } from 'src/schema/dtos';
 
 @Injectable()

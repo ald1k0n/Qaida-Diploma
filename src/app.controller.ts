@@ -10,7 +10,7 @@ import {
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, ObjectId } from 'mongoose';
-import { FileDTO } from './schema/dtos/FileDTO';
+import { FileDTO } from './schema/dtos/FileDTO.dto';
 import { Response } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { AuthGuard } from './shared/guards/auth.guard';
