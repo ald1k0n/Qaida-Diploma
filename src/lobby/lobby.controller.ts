@@ -10,8 +10,9 @@ import {
   UseGuards,
   Patch,
   Query,
+  Delete,
 } from '@nestjs/common';
-import { LobbyDTO } from 'src/schema/dtos';
+import { LobbyDTO } from 'src/schema/dtos/LobbyDTO.dto';
 
 import { Request } from 'express';
 import { AuthGuard } from 'src/shared/guards/auth.guard';
@@ -26,7 +27,7 @@ export class LobbyController {
   @Post('/')
   @UseGuards(AuthGuard)
   async createLobby(
-    @Body() body: Omit<LobbyDTO, 'owner_id' | 'image'> & { image_id: ObjectId },
+    @Body() body: LobbyDTO & { image_id: ObjectId },
     @Req() req: Request,
   ) {
     const payload = {
@@ -67,5 +68,14 @@ export class LobbyController {
   @UseGuards(AuthGuard)
   async handleUser(@Req() req: Request, @Param('lobby_id') lobby_id: ObjectId) {
     return await this.lobbyService.handleUser(req['user'].id, lobby_id);
+  }
+
+  @Delete('/delete/:lobby_id')
+  @UseGuards(AuthGuard)
+  async deleteLobby(
+    @Param('lobby_id') lobby_id: ObjectId,
+    @Req() req: Request,
+  ): Promise<LobbyDTO> {
+    return await this.lobbyService.deleteLobby(req['user'].id, lobby_id);
   }
 }

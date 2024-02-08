@@ -17,8 +17,8 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { AuthGuard } from 'src/shared/guards/auth.guard';
 import { Request } from 'express';
 import { ObjectId } from 'mongoose';
-import { UserDTO } from 'src/schema/dtos/UserDTO';
-import { FileDTO } from 'src/schema/dtos/FileDTO';
+import { UserDTO } from 'src/schema/dtos/UserDTO.dto';
+import { FileDTO } from 'src/schema/dtos/FileDTO.dto';
 import { ApiTags } from '@nestjs/swagger';
 
 @ApiTags('User')
@@ -39,6 +39,17 @@ export class UserController {
       ...body,
     };
     return await this.userService.updateUser(data);
+  }
+
+  @Put('/interest')
+  async insertInterests(
+    @Req() req: Request,
+    @Body() body: { interests: ObjectId[] },
+  ) {
+    return await this.userService.insertInterests(
+      body.interests,
+      req['user'].id,
+    );
   }
 
   @Patch('/update/password')

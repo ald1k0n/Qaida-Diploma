@@ -1,4 +1,4 @@
-import { UserDTO } from 'src/schema/dtos/UserDTO';
+import { UserDTO } from 'src/schema/dtos/UserDTO.dto';
 import {
   Injectable,
   Logger,
@@ -10,13 +10,15 @@ import {
 import * as bcrypt from 'bcryptjs';
 import { InjectModel } from '@nestjs/mongoose';
 import mongoose, { Model, ObjectId } from 'mongoose';
-import { FileDTO } from 'src/schema/dtos/FileDTO';
+import { FileDTO } from 'src/schema/dtos/FileDTO.dto';
+import { CategoryDTO } from 'src/schema/dtos';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectModel('User') private readonly user: Model<UserDTO>,
     @InjectModel('File') private readonly file: Model<FileDTO>,
+    @InjectModel('Category') private readonly category: Model<CategoryDTO>,
   ) {}
 
   private logger = new Logger();
@@ -60,7 +62,7 @@ export class UserService {
 
   public async getme(_id: mongoose.Schema.Types.ObjectId) {
     try {
-      const candidate = await this.user.findById(_id);
+      const candidate = await this.user.findById(_id).populate('interests');
       return candidate;
     } catch (error) {
       throw new UnauthorizedException(error);
@@ -107,5 +109,28 @@ export class UserService {
     );
 
     return { currentUser, friend };
+  }
+
+  public async insertInterests(payload: ObjectId[], user_id: ObjectId) {
+    const existCategories = await this.category.find({
+      _id: {
+        $in: payload,
+      },
+    });
+
+    if (!existCategories)
+      throw new MethodNotAllowedException('Значения не допустимы');
+
+    const user = await this.user.findOne({ _id: user_id });
+    if (!user) throw new UnauthorizedException('Пользователь не найден');
+
+    return await this.updateUserInDB(
+      {
+        $addToSet: {
+          interests: payload,
+        },
+      },
+      user_id,
+    );
   }
 }

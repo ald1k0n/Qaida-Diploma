@@ -5,7 +5,7 @@ export type CategoryDocument = HydratedDocument<CategoryDTO>;
 
 @Schema()
 export class CategoryDTO {
-  _id: mongoose.Schema.Types.ObjectId;
+  _id?: mongoose.Schema.Types.ObjectId;
   @Prop({
     required: true,
   })

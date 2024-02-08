@@ -61,7 +61,7 @@ export class LobbyService {
     return { skip, limit, lobbies, total };
   }
 
-  async deleteLobby(owner_id: ObjectId, lobby_id: ObjectId): Promise<unknown> {
+  async deleteLobby(owner_id: ObjectId, lobby_id: ObjectId): Promise<any> {
     return await this.lobby.deleteOne({ owner_id, _id: lobby_id });
   }
 

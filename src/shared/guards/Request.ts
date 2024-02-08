@@ -1,4 +1,4 @@
-import { UserDTO } from 'src/schema/dtos/UserDTO';
+import { UserDTO } from 'src/schema/dtos/UserDTO.dto';
 import { Request } from 'express';
 import { JwtService } from '@nestjs/jwt';
 import { Model, ObjectId } from 'mongoose';
