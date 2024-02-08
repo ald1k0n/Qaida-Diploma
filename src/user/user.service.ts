@@ -126,7 +126,7 @@ export class UserService {
 
     return await this.updateUserInDB(
       {
-        $push: {
+        $addToSet: {
           interests: payload,
         },
       },
