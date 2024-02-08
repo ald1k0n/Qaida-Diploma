@@ -62,7 +62,7 @@ export class UserService {
 
   public async getme(_id: mongoose.Schema.Types.ObjectId) {
     try {
-      const candidate = await this.user.findById(_id);
+      const candidate = await this.user.findById(_id).populate('interests');
       return candidate;
     } catch (error) {
       throw new UnauthorizedException(error);
