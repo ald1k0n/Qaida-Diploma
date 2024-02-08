@@ -41,6 +41,17 @@ export class UserController {
     return await this.userService.updateUser(data);
   }
 
+  @Put('/interest')
+  async insertInterests(
+    @Req() req: Request,
+    @Body() body: { interests: ObjectId[] },
+  ) {
+    return await this.userService.insertInterests(
+      body.interests,
+      req['user'].id,
+    );
+  }
+
   @Patch('/update/password')
   async updatePassword(
     @Req() req: Request,

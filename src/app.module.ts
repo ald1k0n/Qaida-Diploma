@@ -9,6 +9,7 @@ import { ConfigModule } from '@nestjs/config';
 import { LobbyModule } from './lobby/lobby.module';
 import { PlaceModule } from './place/place.module';
 import { MongooseModule } from '@nestjs/mongoose';
+import { CategoriesModule } from './categories/categories.module';
 
 @Module({
   imports: [
@@ -23,7 +24,8 @@ import { MongooseModule } from '@nestjs/mongoose';
       ignoreEnvVars: false,
     }),
     PlaceModule,
-    MongooseModule.forRoot(process.env?.DATABASE_URL)
+    MongooseModule.forRoot(process.env?.DATABASE_URL),
+    CategoriesModule
   ],
   controllers: [AppController],
   providers: [],

@@ -53,7 +53,7 @@ export class UserDTO {
   image_id?: ObjectId;
 
   @Prop({
-    type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Interest' }],
+    type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Category' }],
   })
   interests?: ObjectId[];
 }

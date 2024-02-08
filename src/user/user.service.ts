@@ -11,12 +11,14 @@ import * as bcrypt from 'bcryptjs';
 import { InjectModel } from '@nestjs/mongoose';
 import mongoose, { Model, ObjectId } from 'mongoose';
 import { FileDTO } from 'src/schema/dtos/FileDTO';
+import { CategoryDTO } from 'src/schema/dtos';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectModel('User') private readonly user: Model<UserDTO>,
     @InjectModel('File') private readonly file: Model<FileDTO>,
+    @InjectModel('Category') private readonly category: Model<CategoryDTO>,
   ) {}
 
   private logger = new Logger();
@@ -107,5 +109,28 @@ export class UserService {
     );
 
     return { currentUser, friend };
+  }
+
+  public async insertInterests(payload: ObjectId[], user_id: ObjectId) {
+    const existCategories = await this.category.find({
+      _id: {
+        $in: payload,
+      },
+    });
+
+    if (!existCategories)
+      throw new MethodNotAllowedException('Значения не допустимы');
+
+    const user = await this.user.findOne({ _id: user_id });
+    if (!user) throw new UnauthorizedException('Пользователь не найден');
+
+    return await this.updateUserInDB(
+      {
+        $push: {
+          interests: payload,
+        },
+      },
+      user_id,
+    );
   }
 }

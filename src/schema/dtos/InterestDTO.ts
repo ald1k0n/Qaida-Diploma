@@ -5,12 +5,17 @@ export type Interest = HydratedDocument<InterestDTO>;
 
 @Schema()
 export class InterestDTO {
-  _id: mongoose.Schema.Types.ObjectId;
+  _id?: mongoose.Schema.Types.ObjectId;
 
   @Prop({
-    required: true,
+    type: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Category',
+      },
+    ],
   })
-  name: string;
+  category_id: mongoose.Schema.Types.ObjectId[];
 }
 
 export const InterestSchema = SchemaFactory.createForClass(InterestDTO);
