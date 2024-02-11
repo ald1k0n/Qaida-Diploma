@@ -1,40 +1,54 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { HydratedDocument, ObjectId } from 'mongoose';
 
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+
 export type User = HydratedDocument<UserDTO>;
 @Schema()
 export class UserDTO {
+  @ApiProperty()
   _id?: ObjectId;
 
+  @ApiProperty()
   @Prop({
     required: true,
   })
   name?: string;
 
+  @ApiProperty()
   @Prop({
     required: true,
   })
   surname?: string;
 
+  @ApiPropertyOptional()
   @Prop()
   father_name?: string;
 
+  @ApiProperty()
   @Prop({
     required: true,
   })
   password?: string;
 
+  @ApiProperty()
   @Prop({
     required: true,
   })
   email?: string;
 
+  @ApiPropertyOptional()
   @Prop()
   messenger_one?: string;
 
+  @ApiPropertyOptional()
   @Prop()
   messenger_two?: string;
 
+  @ApiProperty({
+    enum: ['MALE', 'FEMALE', 'BINARY'],
+    default: 'BINARY',
+  })
   @Prop({
     enum: ['MALE', 'FEMALE', 'BINARY'],
     default: 'BINARY',
