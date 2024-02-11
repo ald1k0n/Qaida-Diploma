@@ -13,13 +13,16 @@ import {
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { FileInterceptor } from '@nestjs/platform-express';
-// import { UploadDTO, UserDTO } from './user.dto';
+
 import { AuthGuard } from 'src/shared/guards/auth.guard';
 import { Request } from 'express';
 import { ObjectId } from 'mongoose';
 import { UserDTO } from 'src/schema/dtos/UserDTO.dto';
 import { FileDTO } from 'src/schema/dtos/FileDTO.dto';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiTags, getSchemaPath, ApiHeader, ApiParam } from '@nestjs/swagger';
+
+import { ApiResponse, ApiBody } from '@nestjs/swagger';
+import { Password } from './password.dto';
 
 @ApiTags('User')
 @UseGuards(AuthGuard)
@@ -28,11 +31,26 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Get('/me')
+  @ApiResponse({
+    status: 200,
+    schema: {
+      $ref: getSchemaPath(UserDTO),
+    },
+  })
   async getMe(@Req() req: Request) {
     return await this.userService.getme(req['user'].id);
   }
 
   @Patch('/update')
+  @ApiBody({
+    schema: {
+      $ref: getSchemaPath(UserDTO),
+    },
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Обновление пользователя, без пароля',
+  })
   async updateUser(@Req() req: Request, @Body() body: Omit<UserDTO, '_id'>) {
     const data = {
       _id: req['user'].id,
@@ -42,6 +60,19 @@ export class UserController {
   }
 
   @Put('/interest')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        interests: {
+          type: 'array',
+          items: {
+            type: 'string',
+          },
+        },
+      },
+    },
+  })
   async insertInterests(
     @Req() req: Request,
     @Body() body: { interests: ObjectId[] },
@@ -53,6 +84,13 @@ export class UserController {
   }
 
   @Patch('/update/password')
+  @ApiBody({
+    type: Password,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Обновление пароля',
+  })
   async updatePassword(
     @Req() req: Request,
     @Body() body: { current: string; newPass: string },
@@ -65,6 +103,21 @@ export class UserController {
   }
 
   @Patch('/avatar')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        image: {
+          type: 'binary',
+          format: 'binary',
+        },
+      },
+    },
+  })
+  @ApiHeader({
+    name: 'application/x-www-form-urlencoded',
+    description: 'Файл',
+  })
   @UseInterceptors(FileInterceptor('image'))
   async uploadAvatar(
     @UploadedFile() image: Express.Multer.File,
@@ -80,6 +133,10 @@ export class UserController {
     return await this.userService.uploadAvatar(file, req['user'].id);
   }
 
+  @ApiParam({
+    type: 'string',
+    name: 'friend_id',
+  })
   @Put('/add/:friend_id')
   async addFriend(
     @Req() req: Request,
@@ -88,6 +145,10 @@ export class UserController {
     return await this.userService.addFriend(req['user'].id, friend_id);
   }
 
+  @ApiParam({
+    type: 'string',
+    name: 'friend_id',
+  })
   @Delete('/delete/:friend_id')
   async removeFriend(
     @Req() req: Request,
