@@ -10,8 +10,14 @@ export class CategoriesService {
     @InjectModel('Category') private readonly category: Model<CategoryDocument>,
   ) {}
   private logger = new Logger();
-  async getAllCategories() {
-    return await this.category.find();
+
+  async getAllCategories(q: string) {
+    return await this.category.find({
+      name: {
+        $regex: q,
+        $options: 'i',
+      },
+    });
   }
 
   async loadCategories() {
