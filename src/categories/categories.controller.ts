@@ -12,9 +12,7 @@ export class CategoriesController {
   @Get('/')
   @ApiResponse({
     status: 200,
-    schema: {
-      $ref: getSchemaPath(CategoryDTO),
-    },
+    type: CategoryDTO,
     description: 'Не зависит от регистра, можно писать сабстринги',
   })
   async getGategories(@Query('q') q: string) {
