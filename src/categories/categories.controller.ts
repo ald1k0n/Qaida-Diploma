@@ -1,4 +1,4 @@
-import { Controller, Get, Post } from '@nestjs/common';
+import { Controller, Get, Post, Query } from '@nestjs/common';
 import { CategoriesService } from './categories.service';
 
 import { ApiResponse, ApiTags, getSchemaPath } from '@nestjs/swagger';
@@ -15,9 +15,10 @@ export class CategoriesController {
     schema: {
       $ref: getSchemaPath(CategoryDTO),
     },
+    description: 'Не зависит от регистра, можно писать сабстринги',
   })
-  async getGategories() {
-    return this.categoryService.getAllCategories();
+  async getGategories(@Query('q') q: string) {
+    return this.categoryService.getAllCategories(q);
   }
 
   @Post('/load')
