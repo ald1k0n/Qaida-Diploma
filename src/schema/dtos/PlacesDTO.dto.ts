@@ -1,6 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { HydratedDocument } from 'mongoose';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { CategoryDTO } from './CategoryDTO.dto';
 
 export type PlaceDocument = HydratedDocument<PlacesDTO>;
 
@@ -21,7 +22,9 @@ export class PlacesDTO {
   @Prop()
   description?: string;
 
-  @ApiProperty()
+  @ApiProperty({
+    type: [CategoryDTO],
+  })
   @Prop({
     type: [{ ref: 'Category', type: mongoose.Schema.Types.ObjectId }],
   })
