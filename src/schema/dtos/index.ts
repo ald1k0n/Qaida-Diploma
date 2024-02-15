@@ -11,3 +11,4 @@ export * from './TagDTO.dto';
 export * from './VoteDTO.dto';
 export * from './ReviewDTO.dto';
 export * from './VisitedDTO.dto';
+export * from './rubricsDTO.dto';

@@ -1,23 +1,43 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { CategoryDocument } from 'src/schema/dtos';
+import { CategoryDocument, RubricsDocument } from 'src/schema/dtos';
 import { getAllRubrics } from 'src/shared/utils/integrationService';
 
 @Injectable()
 export class CategoriesService {
   constructor(
     @InjectModel('Category') private readonly category: Model<CategoryDocument>,
+    @InjectModel('Rubric') private readonly rubric: Model<RubricsDocument>,
   ) {}
   private logger = new Logger();
 
   async getAllCategories(q: string) {
-    return await this.category.find({
-      name: {
-        $regex: q,
-        $options: 'i',
-      },
-    });
+    const data = (await this.rubric.find().populate(['category_ids'])) as any[];
+
+    if (q) {
+      const filteredData = data
+        .map((rubric) => {
+          const matchingCategories = rubric.category_ids.filter(
+            (category: any) =>
+              category.name.toLowerCase().includes(q.toLowerCase()),
+          );
+          if (matchingCategories.length > 0) {
+            return {
+              ...rubric.toJSON(),
+              category_ids: matchingCategories,
+            };
+          } else {
+            return null;
+          }
+        })
+        .filter(Boolean);
+
+      this.logger.debug('query data', filteredData);
+      return filteredData;
+    }
+
+    return data;
   }
 
   async loadCategories() {

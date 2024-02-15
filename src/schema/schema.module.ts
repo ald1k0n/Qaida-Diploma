@@ -14,6 +14,7 @@ import {
   VoteSchema,
   ReviewSchema,
   VisitedSchema,
+  RubricsSchema,
 } from './dtos';
 
 @Module({
@@ -70,6 +71,10 @@ import {
       {
         name: 'Visited',
         schema: VisitedSchema,
+      },
+      {
+        name: 'Rubric',
+        schema: RubricsSchema,
       },
     ]),
   ],
