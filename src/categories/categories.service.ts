@@ -13,29 +13,54 @@ export class CategoriesService {
   private logger = new Logger();
 
   async getAllCategories(q: string) {
-    const data = (await this.rubric.find().populate(['category_ids'])) as any[];
+    let aggregationPipeline: any[] = [];
 
     if (q) {
-      const filteredData = data
-        .map((rubric) => {
-          const matchingCategories = rubric.category_ids.filter(
-            (category: any) =>
-              category.name.toLowerCase().includes(q.toLowerCase()),
-          );
-          if (matchingCategories.length > 0) {
-            return {
-              ...rubric.toJSON(),
-              category_ids: matchingCategories,
-            };
-          } else {
-            return null;
-          }
-        })
-        .filter(Boolean);
-
-      this.logger.debug('query data', filteredData);
-      return filteredData;
+      aggregationPipeline = [
+        {
+          $lookup: {
+            from: 'categories', // Assuming the name of your categories collection is 'categories'
+            localField: 'category_ids',
+            foreignField: '_id',
+            as: 'categories',
+          },
+        },
+        {
+          $addFields: {
+            categories: {
+              $filter: {
+                input: '$categories',
+                as: 'category',
+                cond: {
+                  $regexMatch: {
+                    input: { $toLower: '$$category.name' },
+                    regex: q.toLowerCase(),
+                  },
+                },
+              },
+            },
+          },
+        },
+        {
+          $match: {
+            categories: { $ne: [] },
+          },
+        },
+      ];
+    } else {
+      aggregationPipeline = [
+        {
+          $lookup: {
+            from: 'categories',
+            localField: 'category_ids',
+            foreignField: '_id',
+            as: 'categories',
+          },
+        },
+      ];
     }
+
+    const data = await this.rubric.aggregate(aggregationPipeline);
 
     return data;
   }
