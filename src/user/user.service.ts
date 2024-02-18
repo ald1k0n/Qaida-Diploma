@@ -11,14 +11,14 @@ import * as bcrypt from 'bcryptjs';
 import { InjectModel } from '@nestjs/mongoose';
 import mongoose, { Model, ObjectId } from 'mongoose';
 import { FileDTO } from 'src/schema/dtos/FileDTO.dto';
-import { CategoryDTO } from 'src/schema/dtos';
+import { RubricsDocument } from 'src/schema/dtos';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectModel('User') private readonly user: Model<UserDTO>,
     @InjectModel('File') private readonly file: Model<FileDTO>,
-    @InjectModel('Category') private readonly category: Model<CategoryDTO>,
+    @InjectModel('Rubric') private readonly rubric: Model<RubricsDocument>,
   ) {}
 
   private logger = new Logger();
@@ -112,7 +112,7 @@ export class UserService {
   }
 
   public async insertInterests(payload: ObjectId[], user_id: ObjectId) {
-    const existCategories = await this.category.find({
+    const existCategories = await this.rubric.find({
       _id: {
         $in: payload,
       },

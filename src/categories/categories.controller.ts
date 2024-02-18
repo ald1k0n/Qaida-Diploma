@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Query } from '@nestjs/common';
+import { Controller, Get, Post, Put, Query } from '@nestjs/common';
 import { CategoriesService } from './categories.service';
 
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
@@ -22,5 +22,10 @@ export class CategoriesController {
   @Post('/load')
   async loadCategories() {
     return await this.categoryService.loadCategories();
+  }
+
+  @Put('/file')
+  async loadFromFile() {
+    return this.categoryService.loadFromFile();
   }
 }

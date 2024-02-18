@@ -4,6 +4,8 @@ import { Model } from 'mongoose';
 import { CategoryDocument, RubricsDocument } from 'src/schema/dtos';
 import { getAllRubrics } from 'src/shared/utils/integrationService';
 
+import categories from './csvjson.json';
+
 @Injectable()
 export class CategoriesService {
   constructor(
@@ -90,5 +92,28 @@ export class CategoriesService {
     );
 
     return newCategories;
+  }
+
+  async loadFromFile() {
+    const groupedObjects = [];
+    const groups = {};
+
+    for (const obj of categories) {
+      const group = obj.group;
+      const _id = obj._id;
+
+      if (!(group in groups)) {
+        groups[group] = { name: group, category_ids: [_id] };
+      } else {
+        groups[group].category_ids.push(_id);
+      }
+    }
+
+    for (const group in groups) {
+      groupedObjects.push(groups[group]);
+    }
+
+    const rubrics = await this.rubric.insertMany(groupedObjects);
+    return rubrics;
   }
 }
