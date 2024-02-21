@@ -45,3 +45,20 @@ export const getAllRubrics = async (
     return null;
   }
 };
+
+export const getPlacesByCategoryId = async (
+  rubric_id: string,
+  API_KEY: string,
+  limit: number = 10,
+  page: number = 1,
+) => {
+  try {
+    const response = await fetch(
+      `https://catalog.api.2gis.com/3.0/items?rubric_id=${rubric_id}&key=${API_KEY}&region_id=68&page_size=${limit}&fields=items.point,items.links,items.external_content,items.rubrics,items.reviews,items.schedule&page=${page}&sort=rating`,
+    ).then((res) => res.json());
+    return response.result.items;
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
+};

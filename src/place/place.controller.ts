@@ -26,10 +26,27 @@ export class PlaceController {
 
   @ApiResponse({
     description:
-      'Получить по имени с API, не дергать если не хотим выгрузить место',
+      'Получить по имени с API, не дергать если не хотим выгрузить место. Не трогать с приложения',
   })
   @Get('/:name')
   async loadPlaceFromApi(@Param('name') name: string) {
     return await this.placeService.addPlace(name);
+  }
+
+  @ApiResponse({
+    description:
+      'Получить по имени с API, не дергать если не хотим выгрузить место. Не трогать с приложения',
+  })
+  @Get('/pull/:category_id')
+  async getPlacesByCategories(
+    @Param('category_id') category_id: string,
+    @Query('limit') limit: number,
+    @Query('page') page: number,
+  ) {
+    return await this.placeService.getPlacesByCategories(
+      limit,
+      category_id,
+      page,
+    );
   }
 }
