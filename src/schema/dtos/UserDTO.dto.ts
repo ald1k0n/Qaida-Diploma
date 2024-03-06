@@ -11,6 +11,13 @@ export class UserDTO {
 
   @ApiProperty()
   @Prop({
+    default: false,
+    type: Boolean,
+  })
+  isDiactivated?: boolean;
+
+  @ApiProperty()
+  @Prop({
     required: true,
   })
   name?: string;

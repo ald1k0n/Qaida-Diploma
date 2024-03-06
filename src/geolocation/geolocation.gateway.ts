@@ -29,12 +29,17 @@ export class GeolocationGateway {
   }
 
   @SubscribeMessage('send-location')
-  handleLocation(
-    @MessageBody() location: IGeoLocation,
+  async handleLocation(
+    @MessageBody() body: { location: IGeoLocation; user_id: string },
     @ConnectedSocket() client: Socket,
   ) {
     this.logger.log('client', client.id);
-
-    this.geolocationService.handleGeolocation(client.id, location);
+    this.logger.log('body', body);
+    const locationSpotted = await this.geolocationService.handleGeolocation(
+      client.id,
+      body.user_id,
+      body.location,
+    );
+    if (locationSpotted) this.server.emit('spot', locationSpotted);
   }
 }

@@ -19,12 +19,12 @@ export class CategoriesController {
     return await this.categoryService.getAllCategories(q);
   }
 
-  @Post('/load')
+  @Post('/2gis/load')
   async loadCategories() {
     return await this.categoryService.loadCategories();
   }
 
-  @Put('/file')
+  @Put('/2gis/file')
   async loadFromFile() {
     return this.categoryService.loadFromFile();
   }

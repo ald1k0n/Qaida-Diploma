@@ -1,4 +1,3 @@
-import { UserDTO } from 'src/schema/dtos/UserDTO.dto';
 import {
   Injectable,
   Logger,
@@ -6,12 +5,13 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
+import { UserDTO } from 'src/schema/dtos/UserDTO.dto';
 
-import * as bcrypt from 'bcryptjs';
 import { InjectModel } from '@nestjs/mongoose';
+import * as bcrypt from 'bcryptjs';
 import mongoose, { Model, ObjectId } from 'mongoose';
-import { FileDTO } from 'src/schema/dtos/FileDTO.dto';
 import { RubricsDocument } from 'src/schema/dtos';
+import { FileDTO } from 'src/schema/dtos/FileDTO.dto';
 
 @Injectable()
 export class UserService {
@@ -132,5 +132,24 @@ export class UserService {
       },
       user_id,
     );
+  }
+
+  public async deactivateUser(_id: ObjectId, method?: string) {
+    const user = await this.user.findOne({ _id });
+
+    if (user?.isDiactivated && method === 'DELETE') {
+      throw new MethodNotAllowedException('Пользователь уже деактивирован');
+    }
+
+    return await this.user.updateOne(
+      { _id },
+      {
+        isDiactivated: method === 'DELETE' ? true : false,
+      },
+    );
+  }
+
+  public async deleteUserAccount(_id: ObjectId) {
+    return await this.user.deleteOne({ _id });
   }
 }

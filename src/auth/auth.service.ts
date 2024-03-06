@@ -1,15 +1,15 @@
 import {
-  Injectable,
-  ConflictException,
-  UnauthorizedException,
   BadRequestException,
+  ConflictException,
+  Injectable,
   Logger,
+  UnauthorizedException,
 } from '@nestjs/common';
-import mongoose, { Model } from 'mongoose';
-import * as bcrypt from 'bcryptjs';
 import { JwtService } from '@nestjs/jwt';
-import { UserDTO } from 'src/schema/dtos/UserDTO.dto';
 import { InjectModel } from '@nestjs/mongoose';
+import * as bcrypt from 'bcryptjs';
+import mongoose, { Model } from 'mongoose';
+import { UserDTO } from 'src/schema/dtos/UserDTO.dto';
 
 @Injectable()
 export class AuthService {
@@ -57,10 +57,11 @@ export class AuthService {
   public async authorize(payload: UserDTO) {
     const candidate = await this.getUser({ email: payload.email });
 
-    if (!candidate) throw new UnauthorizedException('User does not exists');
+    if (!candidate)
+      throw new UnauthorizedException('Пользователь не существует');
 
     if (!bcrypt.compareSync(payload.password, candidate.password))
-      throw new UnauthorizedException('Password does not match');
+      throw new UnauthorizedException('Пароль не сходиться');
 
     return {
       access_token: await this.generateToken(

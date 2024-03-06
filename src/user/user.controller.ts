@@ -11,17 +11,17 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { UserService } from './user.service';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { UserService } from './user.service';
 
-import { AuthGuard } from 'src/shared/guards/auth.guard';
+import { ApiHeader, ApiParam, ApiTags, getSchemaPath } from '@nestjs/swagger';
 import { Request } from 'express';
 import { ObjectId } from 'mongoose';
-import { UserDTO } from 'src/schema/dtos/UserDTO.dto';
 import { FileDTO } from 'src/schema/dtos/FileDTO.dto';
-import { ApiTags, getSchemaPath, ApiHeader, ApiParam } from '@nestjs/swagger';
+import { UserDTO } from 'src/schema/dtos/UserDTO.dto';
+import { AuthGuard } from 'src/shared/guards/auth.guard';
 
-import { ApiResponse, ApiBody } from '@nestjs/swagger';
+import { ApiBody, ApiResponse } from '@nestjs/swagger';
 import { Password } from './password.dto';
 
 @ApiTags('User')
@@ -29,6 +29,11 @@ import { Password } from './password.dto';
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
+
+  @Delete('/')
+  async deleteUserAccount(@Req() req: Request): Promise<any> {
+    return await this.userService.deleteUserAccount(req['user'].id);
+  }
 
   @Get('/me')
   @ApiResponse({
@@ -131,6 +136,16 @@ export class UserController {
     // console.log(util.inspect(file, { depth: null }));
 
     return await this.userService.uploadAvatar(file, req['user'].id);
+  }
+
+  @Put('/activate')
+  async activate(@Req() req: Request) {
+    return await this.userService.deactivateUser(req['user'].id, req.method);
+  }
+
+  @Delete('/deactivate')
+  async handleDeactivate(@Req() req: Request) {
+    return await this.userService.deactivateUser(req['user'].id, req.method);
   }
 
   @ApiParam({
