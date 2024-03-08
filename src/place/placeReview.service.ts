@@ -44,6 +44,18 @@ export class PlaceReviewService {
     return review;
   }
 
+  async handleReview(
+    method: 'DELETE' | 'PATCH' | string,
+    payload: { comment: string; score: number } | null,
+    review_id: ObjectId,
+  ) {
+    if (method === 'DELETE') {
+      return await this.review.findByIdAndDelete(review_id);
+    } else if (method === 'PATCH') {
+      return await this.updateReviewById(review_id, payload);
+    }
+  }
+
   async addVoteToReview(review_id: ObjectId, payload: VoteDTO) {
     const review = await this.findByReviewId(review_id);
 

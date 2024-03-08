@@ -15,7 +15,7 @@ import { PlacesDTO } from 'src/schema/dtos';
 import { AuthGuard } from 'src/shared/guards/auth.guard';
 import { GetPlacesService } from './getPlace.service';
 import { PlaceService } from './place.service';
-import { IParams, ParamsDTO } from './types';
+import { IParams, ParamsDTO, UpdateStatusDto } from './types';
 
 @ApiTags('Place')
 @Controller('place')
@@ -25,11 +25,17 @@ export class PlaceController {
     private readonly getPlaceService: GetPlacesService,
   ) {}
 
+  @ApiResponse({ type: PlacesDTO })
+  @Get('/:id')
+  async getPlaceById(@Param('id') id: ObjectId) {
+    return await this.getPlaceService.getPlaceById(id);
+  }
+
   @ApiResponse({
     type: PlacesDTO,
     description: 'categoryid и rubricid не могут отправлять вместе',
   })
-  @Get('/')
+  @Get('/search-category')
   async getPlaces(
     @Query('rubric_id') rubricId?: string,
     @Query('category_id') categoryId?: string,
@@ -37,15 +43,10 @@ export class PlaceController {
     return await this.getPlaceService.getPlace(categoryId, rubricId);
   }
 
-  @Get('/:id')
-  async getPlaceById(@Param('id') id: ObjectId) {
-    return await this.getPlaceService.getPlaceById(id);
-  }
-
   @ApiQuery({
     type: ParamsDTO,
   })
-  @ApiBody({
+  @ApiResponse({
     type: PlacesDTO,
   })
   @Get('/search')
@@ -53,6 +54,7 @@ export class PlaceController {
     return await this.getPlaceService.findByParams(query);
   }
 
+  @ApiResponse({ type: PlacesDTO })
   @UseGuards(AuthGuard)
   @Get('/visited')
   async userPlaces(
@@ -64,6 +66,7 @@ export class PlaceController {
     return await this.getPlaceService.findByUser(req['user'], status, date);
   }
 
+  @ApiBody({ type: UpdateStatusDto })
   @UseGuards(AuthGuard)
   @Put('/visited/:id')
   async updateStatus(

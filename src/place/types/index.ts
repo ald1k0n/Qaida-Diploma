@@ -23,3 +23,10 @@ export class ParamsDTO implements IParams {
   @ApiPropertyOptional()
   title?: string;
 }
+
+import { ApiProperty } from '@nestjs/swagger';
+
+export class UpdateStatusDto {
+  @ApiProperty({ enum: ['VISITED', 'PROCESSING', 'SKIP'] })
+  status: 'VISITED' | 'PROCESSING' | 'SKIP';
+}

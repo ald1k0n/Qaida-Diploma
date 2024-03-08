@@ -9,7 +9,7 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Request } from 'express';
 import { ObjectId } from 'mongoose';
 import { ReviewDTO, VoteDTO } from 'src/schema/dtos';
@@ -26,11 +26,19 @@ export class ReviewController {
     return await this.placeReview.getReviewForPlace(place_id);
   }
 
+  @ApiResponse({
+    type: 'string',
+    isArray: true,
+  })
   @Get('/vote/dict')
   getVoteDict() {
     return ['NEGATIVE', 'POSITIVE'];
   }
 
+  @ApiResponse({ type: ReviewDTO })
+  @ApiBody({
+    type: ReviewDTO,
+  })
   @UseGuards(AuthGuard)
   @Post('/')
   async addReview(@Req() req: Request, @Body() body: ReviewDTO) {
@@ -41,6 +49,37 @@ export class ReviewController {
     return await this.placeReview.addReview(payload);
   }
 
+  @ApiResponse({ type: ReviewDTO })
+  @ApiBody({
+    type: ReviewDTO,
+  })
+  @UseGuards(AuthGuard)
+  @Patch('/:review_id')
+  async updateReview(
+    @Param('review_id') review_id: ObjectId,
+    @Req() req: Request,
+    @Body() payload: { comment: string; score: number },
+  ) {
+    return await this.placeReview.handleReview(
+      req['method'],
+      payload,
+      review_id,
+    );
+  }
+
+  @UseGuards(AuthGuard)
+  @Delete('/:review_id')
+  async deleteReview(
+    @Param('review_id') review_id: ObjectId,
+    @Req() req: Request,
+  ) {
+    return await this.placeReview.handleReview(req['method'], null, review_id);
+  }
+
+  @ApiResponse({ type: VoteDTO })
+  @ApiBody({
+    type: VoteDTO,
+  })
   @UseGuards(AuthGuard)
   @Patch('/:review_id/:vote_id')
   async updateVote(
@@ -57,6 +96,7 @@ export class ReviewController {
     );
   }
 
+  @ApiResponse({ type: ReviewDTO })
   @UseGuards(AuthGuard)
   @Delete('/:review_id/:vote_id')
   async deleteVote(
@@ -72,6 +112,8 @@ export class ReviewController {
     );
   }
 
+  @ApiResponse({ type: ReviewDTO })
+  @ApiBody({ type: VoteDTO })
   @UseGuards(AuthGuard)
   @Post('/vote/:review_id')
   async addVote(
