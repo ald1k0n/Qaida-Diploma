@@ -56,18 +56,20 @@ export class GeolocationService {
     this.logger.debug('location id', coordinates);
 
     if (coordinates) {
-      const place = await this.place.findOne(
+      const places = await this.place.find(
         {
           location_id: coordinates._id,
         },
         { _id: 1 },
       );
-      this.logger.debug('PLACE', place);
-      if (place) {
-        const visited = await this.visit.create({
+
+      if (places) {
+        const objectToCreate = places.map((place) => ({
           place_id: place._id,
           user_id,
-        });
+        }));
+        this.logger.debug('PLACE', objectToCreate);
+        const visited = await this.visit.create(objectToCreate);
 
         return visited;
       }

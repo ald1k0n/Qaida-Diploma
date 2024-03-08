@@ -1,12 +1,19 @@
 import { Module } from '@nestjs/common';
-import { PlaceService } from './place.service';
-import { PlaceController } from './place.controller';
+import { GetPlacesService } from 'src/place/getPlace.service';
 import { SchemaModule } from 'src/schema/schema.module';
 import { LocationService } from 'src/shared/services/location.service';
-import { GetPlacesService } from 'src/place/getPlace.service';
+import { PlaceController } from './place.controller';
+import { PlaceService } from './place.service';
+import { PlaceReviewService } from './placeReview.service';
+import { ReviewController } from './review.controller';
 @Module({
   imports: [SchemaModule],
-  providers: [PlaceService, LocationService, GetPlacesService],
-  controllers: [PlaceController],
+  providers: [
+    PlaceService,
+    LocationService,
+    GetPlacesService,
+    PlaceReviewService,
+  ],
+  controllers: [PlaceController, ReviewController],
 })
 export class PlaceModule {}

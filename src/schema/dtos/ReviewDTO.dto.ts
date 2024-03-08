@@ -1,13 +1,13 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import mongoose, { HydratedDocument, ObjectId } from 'mongoose';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import mongoose, { HydratedDocument, ObjectId } from 'mongoose';
 
 export type ReviewDocument = HydratedDocument<ReviewDTO>;
 
 @Schema()
 export class ReviewDTO {
   @ApiProperty()
-  _id: mongoose.Schema.Types.ObjectId;
+  _id?: mongoose.Schema.Types.ObjectId;
 
   @ApiProperty()
   @Prop({
@@ -34,6 +34,7 @@ export class ReviewDTO {
     type: mongoose.Schema.Types.Decimal128,
     max: 5,
     min: 1,
+    default: 5,
   })
   score: number;
 
@@ -41,26 +42,23 @@ export class ReviewDTO {
   @Prop()
   comment: string;
 
-  @ApiProperty()
-  @Prop({
-    ref: 'Tag',
-    type: mongoose.Schema.Types.ObjectId,
-  })
-  tags: ObjectId[];
-
   @ApiPropertyOptional()
   @Prop({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'File',
   })
-  image: ObjectId;
+  image?: ObjectId;
 
   @ApiProperty()
   @Prop({
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Vote',
+    type: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Vote',
+      },
+    ],
   })
-  review_id: ObjectId;
+  votes?: ObjectId[];
 }
 
 export const ReviewSchema = SchemaFactory.createForClass(ReviewDTO);

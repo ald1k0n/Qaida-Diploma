@@ -1,6 +1,11 @@
-import { Injectable, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  NotAcceptableException,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, ObjectId } from 'mongoose';
+import { Model, ObjectId, isObjectIdOrHexString } from 'mongoose';
 import {
   PlaceDocument,
   RubricsDocument,
@@ -43,6 +48,16 @@ export class GetPlacesService {
     }
 
     return await this.place.find(query).populate('category_id');
+  }
+
+  public async getPlaceById(_id: ObjectId) {
+    if (!isObjectIdOrHexString(_id))
+      throw new NotAcceptableException(
+        'Предоставленный ID не является корректным',
+      );
+    const place = await this.place.findById(_id).populate(['schedule_id']);
+    if (!place) throw new NotFoundException('Место не найдено');
+    return place;
   }
 
   async findByParams(params: IParams) {
@@ -91,6 +106,7 @@ export class GetPlacesService {
   async findByUser(
     user_id: ObjectId,
     status?: 'VISITED' | 'PROCESSING' | 'SKIP',
+    date?: number,
   ) {
     const query = {
       user_id,
@@ -99,9 +115,24 @@ export class GetPlacesService {
     if (status) {
       query['status'] = status;
     }
+    if (date && !isNaN(Number(date))) {
+      query['visited_time'] = new Date(Number(date));
+    } else if (date) {
+      throw new NotAcceptableException('Не правильный тип даты отправлен');
+    }
 
-    // this.logger.debug('Query', JSON.stringify(query));
-    console.log(query);
     return await this.visit.find(query).populate(['place_id', 'user_id']);
+  }
+
+  async changeStatus(
+    visit_id: ObjectId,
+    status: 'VISITED' | 'PROCESSING' | 'SKIP',
+  ) {
+    return await this.visit.updateOne(
+      { _id: visit_id },
+      {
+        status,
+      },
+    );
   }
 }

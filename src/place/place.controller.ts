@@ -1,6 +1,16 @@
-import { Controller, Get, Param, Query, Req, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Put,
+  Query,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiBody, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Request } from 'express';
+import { ObjectId } from 'mongoose';
 import { PlacesDTO } from 'src/schema/dtos';
 import { AuthGuard } from 'src/shared/guards/auth.guard';
 import { GetPlacesService } from './getPlace.service';
@@ -27,6 +37,11 @@ export class PlaceController {
     return await this.getPlaceService.getPlace(categoryId, rubricId);
   }
 
+  @Get('/:id')
+  async getPlaceById(@Param('id') id: ObjectId) {
+    return await this.getPlaceService.getPlaceById(id);
+  }
+
   @ApiQuery({
     type: ParamsDTO,
   })
@@ -43,8 +58,19 @@ export class PlaceController {
   async userPlaces(
     @Req() req: Request,
     @Query('status') status: 'VISITED' | 'PROCESSING' | 'SKIP',
+    @Query('date') date: number = null,
   ) {
-    return await this.getPlaceService.findByUser(req['user'], status);
+    console.log(typeof date);
+    return await this.getPlaceService.findByUser(req['user'], status, date);
+  }
+
+  @UseGuards(AuthGuard)
+  @Put('/visited/:id')
+  async updateStatus(
+    @Param('id') _id: ObjectId,
+    @Body() { status }: { status: 'VISITED' | 'PROCESSING' | 'SKIP' },
+  ) {
+    return await this.getPlaceService.changeStatus(_id, status);
   }
 
   @ApiResponse({

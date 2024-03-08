@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import mongoose, { HydratedDocument } from 'mongoose';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import mongoose, { HydratedDocument } from 'mongoose';
 import { CategoryDTO } from './CategoryDTO.dto';
 
 export type PlaceDocument = HydratedDocument<PlacesDTO>;

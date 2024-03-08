@@ -8,11 +8,7 @@ export type VoteDocument = HydratedDocument<VoteDTO>;
 @Schema()
 export class VoteDTO {
   @ApiProperty()
-  _id: ObjectId;
-
-  @ApiProperty()
-  @Prop()
-  name: string;
+  _id?: ObjectId;
 
   @ApiProperty({
     enum: ['POSITIVE', 'NEGATIVE'],
