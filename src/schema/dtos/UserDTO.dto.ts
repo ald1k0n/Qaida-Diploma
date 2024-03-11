@@ -17,15 +17,11 @@ export class UserDTO {
   isDiactivated?: boolean;
 
   @ApiProperty()
-  @Prop({
-    required: true,
-  })
+  @Prop()
   name?: string;
 
   @ApiProperty()
-  @Prop({
-    required: true,
-  })
+  @Prop()
   surname?: string;
 
   @ApiPropertyOptional()
