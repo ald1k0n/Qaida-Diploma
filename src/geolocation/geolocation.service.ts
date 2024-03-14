@@ -51,14 +51,34 @@ export class GeolocationService {
   ) {
     this.clientLocations.set(clientId, { location, user_id });
 
-    const coordinates = await this.location.findOne(location);
+    const locations = await this.location.aggregate([
+      {
+        $addFields: {
+          distance: {
+            $sqrt: {
+              $add: [
+                { $pow: [{ $subtract: ['$lat', location.lat] }, 2] },
+                { $pow: [{ $subtract: ['$lon', location.lon] }, 2] },
+              ],
+            },
+          },
+        },
+      },
+      {
+        $match: {
+          distance: { $lte: 0.0004382872 },
+        },
+      },
+    ]);
 
-    this.logger.debug('location id', coordinates);
+    this.logger.debug('location id', locations);
 
-    if (coordinates) {
+    if (locations) {
       const places = await this.place.find(
         {
-          location_id: coordinates._id,
+          location_id: {
+            $in: locations.map((e) => e._id),
+          },
         },
         { _id: 1 },
       );
