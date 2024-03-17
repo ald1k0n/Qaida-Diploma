@@ -25,7 +25,7 @@ export class UserService {
   /**
    *  Обновляет пользователя для того чтобы не писать один и тот же код несколько раз
    */
-  private async updateUserInDB(data: any, id: ObjectId) {
+  private async updateUserInDB(data: any, id: ObjectId | string) {
     return await this.user.updateOne({ _id: id }, data);
   }
 
@@ -60,9 +60,24 @@ export class UserService {
     );
   }
 
+  public async updateFavorites(user_id: string, place_ids: string[]) {
+    try {
+      return await this.updateUserInDB(
+        {
+          favorites: place_ids,
+        },
+        user_id,
+      );
+    } catch (error) {
+      throw new UnauthorizedException(error);
+    }
+  }
+
   public async getme(_id: mongoose.Schema.Types.ObjectId) {
     try {
-      const candidate = await this.user.findById(_id).populate('interests');
+      const candidate = await this.user
+        .findById(_id)
+        .populate(['interests', 'favorites', 'friends']);
       return candidate;
     } catch (error) {
       throw new UnauthorizedException(error);

@@ -73,6 +73,12 @@ export class UserDTO {
     type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Rubric' }],
   })
   interests?: ObjectId[];
+
+  @Prop({
+    type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Place' }],
+    default: [],
+  })
+  favorites?: ObjectId[];
 }
 
 export const UserSchema = SchemaFactory.createForClass(UserDTO);

@@ -23,6 +23,7 @@ import { AuthGuard } from 'src/shared/guards/auth.guard';
 
 import { ApiBody, ApiResponse } from '@nestjs/swagger';
 import { Password } from './password.dto';
+import { Favorites } from './types';
 
 @ApiTags('User')
 @UseGuards(AuthGuard)
@@ -62,6 +63,16 @@ export class UserController {
       ...body,
     };
     return await this.userService.updateUser(data);
+  }
+
+  @Put('/favorites')
+  @ApiBody({
+    type: Favorites,
+    description:
+      'При добавлении или удалении отправлять просто массив с состояния',
+  })
+  async favorites(@Body() { place_ids }: Favorites, @Req() req: Request) {
+    return this.userService.updateFavorites(req['user'].id, place_ids);
   }
 
   @Put('/interest')
