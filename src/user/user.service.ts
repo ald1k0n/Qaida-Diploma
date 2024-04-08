@@ -167,4 +167,38 @@ export class UserService {
   public async deleteUserAccount(_id: ObjectId) {
     return await this.user.deleteOne({ _id });
   }
+
+  public async getUserDataForModel() {
+    const userData = await this.user
+      .find(
+        {
+          interests: {
+            $ne: [],
+          },
+        },
+        {
+          password: 0,
+          gender: 0,
+          friends: 0,
+          isDiactivated: 0,
+          __v: 0,
+        },
+        {},
+      )
+      .populate([
+        {
+          path: 'interests',
+          populate: {
+            path: 'category_ids',
+            model: 'Category',
+            select: '_id name',
+          },
+        },
+        {
+          path: 'favorites',
+          select: '_id title',
+        },
+      ]);
+    return userData;
+  }
 }

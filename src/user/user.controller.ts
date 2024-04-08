@@ -47,6 +47,10 @@ export class UserController {
     return await this.userService.getme(req['user'].id);
   }
 
+  @Get('/get-user-data')
+  async getUserData() {
+    return await this.userService.getUserDataForModel();
+  }
   @Patch('/update')
   @ApiBody({
     schema: {

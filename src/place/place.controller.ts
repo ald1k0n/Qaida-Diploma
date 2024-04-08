@@ -26,7 +26,7 @@ export class PlaceController {
   ) {}
 
   @ApiResponse({ type: PlacesDTO })
-  @Get('/:id')
+  @Get('/place/:id')
   async getPlaceById(@Param('id') id: ObjectId) {
     return await this.getPlaceService.getPlaceById(id);
   }
