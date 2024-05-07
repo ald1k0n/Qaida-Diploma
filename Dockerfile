@@ -7,6 +7,6 @@ COPY package.json /home/app
 RUN npm install -g pnpm
 RUN pnpm install
 
-COPY . /app/
+COPY . /home/app/
 
 EXPOSE 8080
