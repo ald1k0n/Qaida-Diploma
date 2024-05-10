@@ -38,3 +38,5 @@ lerna-debug.log*
 /cosine-service/venv/
 /cosine-service/__pycache__
 /cosine-service/Model/__pycache__
+/knn-service/Model/__pycache__
+/knn-service/venv
