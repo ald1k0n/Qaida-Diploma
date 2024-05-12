@@ -1,4 +1,5 @@
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from Model.KNN import generateRecommendationIds, getPlacesByIds
 from typing import List
 from pydantic import BaseModel
@@ -8,6 +9,16 @@ app = FastAPI()
 class UserId(BaseModel):
     user_id: str
 
+
+origins = ["*"]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.post('/recommend')
 async def get_recommendation(user_id:UserId):
