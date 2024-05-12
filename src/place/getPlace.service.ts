@@ -128,11 +128,53 @@ export class GetPlacesService {
     visit_id: ObjectId,
     status: 'VISITED' | 'PROCESSING' | 'SKIP',
   ) {
-    return await this.visit.updateOne(
+    const visited = await this.visit.findOneAndUpdate(
       { _id: visit_id },
       {
         status,
       },
     );
+
+    return visited;
+  }
+
+  async getTopThreePopular() {
+    const places = await this.visit.aggregate([
+      {
+        $match: {
+          status: 'VISITED',
+        },
+      },
+      {
+        $group: {
+          _id: '$place_id',
+          count: { $sum: 1 },
+          place: { $first: '$$ROOT' },
+          average_score: { $avg: { $ifNull: ['$score', []] } }, // Calculate the average score
+        },
+      },
+      {
+        $sort: { count: -1 },
+      },
+      {
+        $limit: 3,
+      },
+      {
+        $lookup: {
+          from: 'places',
+          localField: '_id',
+          foreignField: '_id',
+          as: 'visited_place',
+        },
+      },
+      {
+        $replaceRoot: {
+          newRoot: {
+            $mergeObjects: [{ $arrayElemAt: ['$visited_place', 0] }, '$place'],
+          },
+        },
+      },
+    ]);
+    return places;
   }
 }

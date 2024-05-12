@@ -54,6 +54,44 @@ export class PlaceController {
     return await this.getPlaceService.findByParams(query);
   }
 
+  @ApiResponse({
+    status: 200,
+    description: 'Получить топ 3 места по посещениям',
+    type: 'array',
+    schema: {
+      type: 'object',
+      properties: {
+        _id: { type: 'string' },
+        title: { type: 'string' },
+        category_id: { type: 'array', items: { type: 'string' } },
+        address: { type: 'string' },
+        location_id: { type: 'string' },
+        url: { type: 'string', format: 'uri' },
+        image: { type: 'string', format: 'uri' },
+        score: { type: 'array', items: { type: 'number' } },
+        score_2gis: {
+          type: 'object',
+          properties: {
+            $numberDecimal: { type: 'string' },
+          },
+        },
+        schedule_id: { type: 'string' },
+        neighborhood_name: { type: 'string' },
+        neighborhood_id: { type: 'string' },
+        building_id: { type: 'integer' },
+        __v: { type: 'integer' },
+        user_id: { type: 'string' },
+        place_id: { type: 'string' },
+        visited_at: { type: 'string', format: 'date-time' },
+        status: { type: 'string' },
+      },
+    },
+  })
+  @Get('/top')
+  async getTopThree() {
+    return await this.getPlaceService.getTopThreePopular();
+  }
+
   @ApiResponse({ type: PlacesDTO })
   @UseGuards(AuthGuard)
   @Get('/visited')
@@ -71,7 +109,8 @@ export class PlaceController {
   @Put('/visited/:id')
   async updateStatus(
     @Param('id') _id: ObjectId,
-    @Body() { status }: { status: 'VISITED' | 'PROCESSING' | 'SKIP' },
+    @Body()
+    { status }: { status: 'VISITED' | 'PROCESSING' | 'SKIP' },
   ) {
     return await this.getPlaceService.changeStatus(_id, status);
   }
