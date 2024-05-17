@@ -43,7 +43,7 @@ export class PlaceReviewService {
   async addReview(payload: ReviewDTO) {
     if (payload.score)
       await this.place.findByIdAndUpdate(payload.place_id, {
-        $addToSet: {
+        $push: {
           score: payload?.score,
         },
       });
