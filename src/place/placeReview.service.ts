@@ -2,6 +2,7 @@ import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, ObjectId } from 'mongoose';
 import {
+  PlaceDocument,
   ReviewDTO,
   ReviewDocument,
   VoteDTO,
@@ -15,6 +16,7 @@ export class PlaceReviewService {
   constructor(
     @InjectModel('Review') private readonly review: Model<ReviewDocument>,
     @InjectModel('Vote') private readonly vote: Model<VoteDocument>,
+    @InjectModel('Place') private readonly place: Model<PlaceDocument>,
     private readonly getPlaceService: GetPlacesService,
   ) {}
 
@@ -39,7 +41,13 @@ export class PlaceReviewService {
   }
 
   async addReview(payload: ReviewDTO) {
-    await this.getPlaceService.getPlaceById(payload.place_id);
+    if (payload.score)
+      await this.place.findByIdAndUpdate(payload.place_id, {
+        $addToSet: {
+          score: payload?.score,
+        },
+      });
+
     const review = await this.review.create(payload);
     return review;
   }
