@@ -133,6 +133,9 @@ export class GetPlacesService {
       {
         status,
       },
+      {
+        new: true,
+      },
     );
 
     return visited;
