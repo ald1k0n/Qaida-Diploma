@@ -55,7 +55,9 @@ export class GetPlacesService {
       throw new NotAcceptableException(
         'Предоставленный ID не является корректным',
       );
-    const place = await this.place.findById(_id).populate(['schedule_id']);
+    const place = await this.place
+      .findById(_id)
+      .populate(['schedule_id', 'location_id']);
     if (!place) throw new NotFoundException('Место не найдено');
     return place;
   }

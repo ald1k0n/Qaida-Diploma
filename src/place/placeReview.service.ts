@@ -37,7 +37,7 @@ export class PlaceReviewService {
       .find({
         place_id,
       })
-      .populate(['votes']);
+      .populate(['votes', 'user_id']);
   }
 
   async addReview(payload: ReviewDTO) {
